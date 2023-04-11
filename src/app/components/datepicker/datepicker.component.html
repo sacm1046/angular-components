@@ -1,0 +1,144 @@
+<div class="datepicker__container">
+  <div [ngClass]="[
+      showCalendar ? 'datepicker__input-group--active' : '',
+      'datepicker__input-group'
+    ]">
+
+    <!-- Days range section -->
+    <div class="datepicker__section datepicker__section--days">
+      <input
+        type="text"
+        id="datepicker__input__days"
+        [ngClass]="[
+          'datepicker__input',
+          'datepicker__input--days',
+          daysControl.value ? 'datepicker__input--with-data' : ''
+        ]"
+        [formControl]="daysControl"
+        [maxlength]="3"
+        [readonly]="false"
+      >
+      <label
+        for="datepicker__input__days"
+        [ngClass]="[
+          'datepicker__label',
+          daysControl.value ? 'datepicker__label--with-data' : '',
+        ]"
+      >Plazo</label>
+      <div
+        class="datepicker__mask"
+        [ngClass]="[
+          'datepicker__mask',
+          daysControl.value ? 'datepicker__mask--with-data' : '',
+        ]"
+      >
+        <span class="datepicker__mask__value">{{daysControl.value}}</span>
+        <span class="datepicker__mask__character">días</span>
+      </div>
+    </div>
+
+    <!-- Calendar section -->
+    <div id="datepicker__calendar" class="datepicker__section datepicker__section--calendar">
+      <label
+        for="datepicker__input__calendar"
+        [ngClass]="[
+          'datepicker__label',
+          dateControl.value || showCalendar ? 'datepicker__label--with-data' : '',
+          showCalendar ? 'datepicker__label--active' : '',
+        ]"
+      >Vencimiento</label>
+      <input
+        type="text"
+        id="datepicker__input__calendar"
+        [ngClass]="[
+          'datepicker__input',
+          'datepicker__input--calendar',
+          showCalendar ? 'datepicker__input--active' : '',
+          dateControl.value ? 'datepicker__input--with-data' : ''
+        ]"
+        [value]="formatDate(this.dateControl.value)"
+        (click)="displayCalendar()"
+        readonly
+      >
+
+      <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" [ngClass]="[
+      showCalendar ? 'datepicker__icon--active' : '',
+      'datepicker__icon'
+    ]" fill="#AFBACC" (click)="displayCalendar()">
+        <path fill-rule="evenodd" clip-rule="evenodd"
+          d="M19.22 4H18.22V2H16.22V4H8.21997V2H6.21997V4H5.21997C4.10997 4 3.22997 4.9 3.22997 6L3.21997 20C3.21997 21.1 4.10997 22 5.21997 22H19.22C20.32 22 21.22 21.1 21.22 20V6C21.22 4.9 20.32 4 19.22 4ZM7.21997 11V13H9.21997V11H7.21997ZM13.22 11H11.22V13H13.22V11ZM17.22 11V13H15.22V11H17.22ZM5.21997 20H19.22V9H5.21997V20Z" />
+      </svg>
+
+      <div [ngClass]="[
+      showCalendar ? 'datepicker__calendar--show' : '',
+      'datepicker__calendar'
+    ]">
+        <div class="datepicker__controls">
+          <div
+          [ngClass]="[
+            'datepicker__arrow-container',
+            isDisableBack ? 'datepicker__arrow-container--disabled' : ''
+          ]"
+            (click)="onClickArrow(false)"
+          >
+            <div class="datepicker__arrow datepicker__arrow--left"></div>
+          </div>
+
+          <div class="datepicker__current">
+            {{ selectedMonth }} {{ selectedYear }}
+          </div>
+
+          <div
+            [ngClass]="[
+              'datepicker__arrow-container',
+              isDisableFront ? 'datepicker__arrow-container--disabled' : ''
+            ]"
+            (click)="onClickArrow(true)"
+          >
+            <div class="datepicker__arrow datepicker__arrow--right"></div>
+          </div>
+        </div>
+
+        <div class="datepicker__units">
+          <div class="datepicker__unit">
+            <div class="datepicker__header">
+              <span class="datepicker__name-day" *ngFor="let day of weekdays">
+                {{ day.initial }}
+              </span>
+            </div>
+
+            <div class="datepicker__month">
+              {{ selectedMonth | uppercase | slice: 0:3 }}
+            </div>
+
+            <div
+              [ngClass]="[
+                'datepicker__days',
+                isFitting ? 'datepicker__days--fit' : '',
+              ]"
+            >
+              <div [ngClass]="[
+              i === 0 ? 'datepicker__first-day-' + item.weekday : '',
+              'datepicker__day'
+            ]" *ngFor="
+              let item of createCurrentMonth(selectedMonth, selectedYear);
+              index as i
+            ">
+                <div (click)="setDate(item.date)" [ngClass]="['datepicker__square', handleDay(item)]">
+                  {{ item.number }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class=" datepicker__footer">
+          <ng-content></ng-content>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>

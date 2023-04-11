@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'components-room';
+  minDate = new Date()
+  maxDate = new Date("2024-04-10")
+
+  profileForm = new FormGroup({
+    today: new FormControl(''),
+  });
+
+
 }
