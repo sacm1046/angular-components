@@ -2,9 +2,8 @@
 
 <lib-datepicker
   [control]="profileForm.controls.today"
-  [minDate]="minDate"
-  [maxDate]="maxDate"
-  [disableWeekend]="true"
+
+  [disableWeekends]="true"
   [holidays]="['2023/05/17']"
   >
   <div class="fake">Este es un footer de prueba</div>
@@ -13,3 +12,5 @@
 <div>
   <h4>{{ profileForm.controls.today.value | date: 'dd/MM/YYYY' }}</h4>
 </div>
+
+<!-- <lib-cards></lib-cards> -->

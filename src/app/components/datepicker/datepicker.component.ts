@@ -13,7 +13,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   @Input() control: FormControl = new FormControl("");
   @Input() minDate: Date | null = null;
   @Input() maxDate: Date | null = null;
-  @Input() disableWeekend: boolean = false;
+  @Input() disableWeekends: boolean = false;
   @Input() holidays: string[] = [];
 
   @HostListener('document:click', ['$event'])
@@ -121,20 +121,28 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   }
 
   setDisableArrows() {
-    if (
-      this.currentMonth - 1 < (this.minDate || this.today).getMonth() &&
-      this.currentYear <= (this.minDate || this.today).getFullYear()
-    ) {
-      this.isDisableBack = true
+    if (this.minDate) {
+      if (
+        this.currentMonth - 1 < (this.minDate || this.today).getMonth() &&
+        this.currentYear <= (this.minDate || this.today).getFullYear()
+      ) {
+        this.isDisableBack = true
+      } else {
+        this.isDisableBack = false
+      }
     } else {
       this.isDisableBack = false
     }
 
-    if (
-      this.currentMonth + 1 > (this.maxDate || this.today).getMonth() &&
-      this.currentYear > (this.minDate || this.today).getFullYear()
-    ) {
-      this.isDisableFront = true
+    if (this.maxDate) {
+      if (
+        this.currentMonth + 1 > (this.maxDate || this.today).getMonth() &&
+        this.currentYear > (this.minDate || this.today).getFullYear()
+      ) {
+        this.isDisableFront = true
+      } else {
+        this.isDisableFront = false
+      }
     } else {
       this.isDisableFront = false
     }
@@ -180,7 +188,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     const currentF = this.formatDate(current)
     const dateF = this.formatDate(this.dateControl.value)
     const todayF = this.formatDate(this.today)
-    const disableWeekends = this.disableWeekend ? weekday === 6 || weekday === 7 : false
+    const disableWeekends = this.disableWeekends ? weekday === 6 || weekday === 7 : false
 
     if (currentF === dateF) return 'datepicker__square--active'
     if (currentF === todayF) return 'datepicker__square--current'
