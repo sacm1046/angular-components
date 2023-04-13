@@ -13,8 +13,11 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   @Input() control: FormControl = new FormControl("");
   @Input() minDate: Date | null = null;
   @Input() maxDate: Date | null = null;
-  @Input() disableWeekends: boolean = false;
   @Input() holidays: string[] = [];
+  @Input() isDisableWeekends: string | null = null;
+  get disableWeekends(){
+    return typeof this.isDisableWeekends === "string"
+  }
 
   @HostListener('document:click', ['$event'])
   clickout(event: PointerEvent) {

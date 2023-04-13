@@ -2,8 +2,9 @@
 
 <lib-datepicker
   [control]="profileForm.controls.today"
-
-  [disableWeekends]="true"
+  [minDate]="minDate"
+  [maxDate]="maxDate"
+  isDisableWeekends
   [holidays]="['2023/05/17']"
   >
   <div class="fake">Este es un footer de prueba</div>
