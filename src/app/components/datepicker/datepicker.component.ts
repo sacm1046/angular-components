@@ -3,6 +3,14 @@ import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { months, weekdays, shortMonths } from './constants';
 
+type ValidationTypeT = "error" | "warning"
+type ValidationNameT = "startAt" | "endAt" | "workday"
+interface ValidationI {
+  type: ValidationTypeT
+  name: ValidationNameT
+  value?: number
+}
+
 @Component({
   selector: 'lib-datepicker',
   templateUrl: './datepicker.component.html',
@@ -11,12 +19,26 @@ import { months, weekdays, shortMonths } from './constants';
 })
 export class DatepickerComponent implements OnInit, OnDestroy {
   @Input() control: FormControl = new FormControl("");
-  @Input() minDate: Date | null = null;
-  @Input() maxDate: Date | null = null;
+  @Input() startAt: number = 0;
+  @Input() endAt: number = 0;
+
+  validations: ValidationI[] = []
   @Input() holidays: string[] = [];
   @Input() isDisableWeekends: string | null = null;
+  @Input() isCheckingWorkdays: string | null = null;
+
+
   get disableWeekends(){
     return typeof this.isDisableWeekends === "string"
+  }
+  get errorWorkday(){
+    return typeof this.isCheckingWorkdays === "string"
+  }
+  get minDate(){
+    return this.addDays(this.today, this.startAt)
+  }
+  get maxDate(){
+    return this.addDays(this.today, this.endAt || 730)
   }
 
   @HostListener('document:click', ['$event'])
@@ -35,6 +57,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   weekdays = weekdays;
 
   /* Calendar controls */
+  validation:ValidationI | undefined = undefined;
   isFitting = false
   isDisableBack = false
   isDisableFront = false
@@ -51,7 +74,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
 
   justNumber(valor: string) {
     const justNumbers = Number(valor.replace(/\D/g, ''));
-    const limited = justNumbers < this.maxDiffDays ? justNumbers : this.maxDiffDays
+    const limited = justNumbers < this.endAt ? justNumbers : this.endAt
     return limited.toString()
   }
 
@@ -66,27 +89,25 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     return msDiff < 1 ? 0 : Math.trunc(msDiff / (1000 * 60 * 60 * 24)) + 1;
   }
 
-  ngOnInit() {
-    this.subscription.add(this.dateControl.valueChanges.subscribe(value => {
-      this.dateControl.setValue(value, { emitEvent: false });
-      const diffDays = this.diffDays(value, this.today).toString()
-      const daysNumber = this.justNumber(diffDays)
-      this.daysControl.setValue(daysNumber, { emitEvent: false });
-      this.control.setValue(value)
-    }))
-    this.subscription.add(this.daysControl.valueChanges.subscribe(value => {
-      const daysNumber = this.justNumber(value)
-      const formattedDate = this.addDays(this.today, Number(daysNumber))
-      this.daysControl.setValue(daysNumber, { emitEvent: false });
-      this.dateControl.setValue(formattedDate, { emitEvent: false });
-      this.control.setValue(formattedDate)
-    }))
-  }
-
   isHoliday(date: Date) {
     return this.holidays.find(
       (holiday) => new Date(holiday).toString() === date.toString()
     )
+  }
+
+  checkHolidayOrWeekend(date: Date | string) {
+    date = new Date(date)
+    const dayNumber = date.getDay();
+    return {
+      isHoliday: this.isHoliday(date),
+      isWeekend: dayNumber === 0 || dayNumber === 6,
+      tomorror: this.addDays(date, 1)
+    }
+  }
+
+  getNextWorkDay(current: Date | string): any {
+    const { isWeekend, isHoliday, tomorror } = this.checkHolidayOrWeekend(current)
+    return (isWeekend || isHoliday) ? this.getNextWorkDay(tomorror) : new Date(current)
   }
 
   createCurrentMonth(month: string, year: number) {
@@ -192,16 +213,68 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     const dateF = this.formatDate(this.dateControl.value)
     const todayF = this.formatDate(this.today)
     const disableWeekends = this.disableWeekends ? weekday === 6 || weekday === 7 : false
-
+    const isDisabled = disableWeekends || this.minDate && current < this.minDate || this.maxDate && current >= this.maxDate
+    if (isDisabled && currentF === todayF) return 'datepicker__square--disabled datepicker__square--current'
+    if (isDisabled) return 'datepicker__square--disabled'
     if (currentF === dateF) return 'datepicker__square--active'
     if (currentF === todayF) return 'datepicker__square--current'
     if (this.isHoliday(current)) return 'datepicker__square--disabled'
-    if (
-      disableWeekends ||
-      this.minDate && current < this.minDate ||
-      this.maxDate && current >= this.maxDate
-    ) return 'datepicker__square--disabled'
     return ''
+  }
+
+  /* handleValidations(){
+    if(this.validations.length > 0) {
+      this.validation = this.validations.find((validation) => validation)
+    }
+  } */
+
+  error = false
+  warning = false
+
+  /* handleError(name: ValidationNameT, value: number, current: number) {
+    return {
+      "startAt": current > value,
+      "endAt": current < value,
+      "workday": "",
+    }[name]
+  } */
+
+  ngOnInit() {
+    /* When calendar selection change */
+    this.subscription.add(this.dateControl.valueChanges.subscribe(value => {
+      this.dateControl.setValue(value, { emitEvent: false });
+      const diffDays = this.diffDays(value, this.today).toString()
+      const daysNumber = this.justNumber(diffDays)
+      this.daysControl.setValue(daysNumber, { emitEvent: false });
+      this.control.setValue(value)
+      this.error = false
+      this.warning = false
+    }))
+    /* When day input change */
+    this.subscription.add(this.daysControl.valueChanges.subscribe(value => {
+      const daysNumber = this.justNumber(value)
+      const formattedDate = this.addDays(this.today, Number(daysNumber))
+
+      if (this.error) {
+        this.warning = false
+      } else {
+        this.warning = this.diffDays(formattedDate, this.today) <= this.startAt + 1
+      }
+
+      if (this.warning) {
+        this.error = false
+      } else {
+        this.error = this.formatDate(this.getNextWorkDay(formattedDate)) !== this.formatDate(formattedDate)
+      }
+
+
+
+
+      this.daysControl.setValue(daysNumber, { emitEvent: false });
+      this.dateControl.setValue(formattedDate, { emitEvent: false });
+      this.control.setValue(formattedDate)
+    }))
+    /* this.handleValidations() */
   }
 
   ngOnDestroy() {

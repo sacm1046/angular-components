@@ -1,6 +1,8 @@
 $border-color: rgba(221, 227, 237, 1);
 $primary-color: #1976d2;
 $secondary-color: #89bdf1;
+$danger-color: red;
+$warning-color: orange;
 $light-color: white;
 $box-shadow-color: rgba(18, 25, 84, 0.07);
 $font-family: Poppins;
@@ -20,6 +22,7 @@ $transition: 100ms;
     display: flex;
     align-items: center;
     cursor: pointer;
+    position: relative;
   }
 
   &__section {
@@ -55,6 +58,53 @@ $transition: 100ms;
       line-height: 16px;
     }
   }
+
+  /* &__validation {
+    box-sizing: border-box;
+    position: absolute;
+    background-color: transparent;
+    pointer-events: none;
+    height: 56px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 1;
+    border-radius: 4px;
+    display: flex;
+
+    &__days {
+      flex: 3;
+    }
+
+    &__calendar {
+      flex: 5;
+      position: relative;
+    }
+
+    &__divider {
+      position: absolute;
+      left: -3px;
+      top: 0;
+      height: 54px;
+      width: 3px;
+      z-index: 2;
+
+      &--error {
+        background-color: $danger-color;
+      }
+
+      &--warning {
+        background-color: $warning-color;
+      }
+    }
+
+    &--error {
+      border: 2px solid $danger-color;
+    }
+
+    &--warning {
+      border: 2px solid $warning-color;
+    }
+  } */
 
   &__mask {
     position: absolute;
@@ -96,17 +146,12 @@ $transition: 100ms;
     line-height: 24px;
     color: black;
 
-    &--calendar {
-      border-radius: 0 4px 4px 0;
-      user-select: none;
-      cursor: pointer;
-    }
-
     &--days {
       border-radius: 4px 0 0 4px;
       border-right: none;
+      transition: $transition;
 
-      &:focus {
+      &:not(.datepicker__input--error):not(.datepicker__input--warning):focus {
         border: 2px solid $primary-color;
         padding: 16px 16px 0 16px;
 
@@ -127,6 +172,34 @@ $transition: 100ms;
     &--with-data {
       padding: 16px 16px 0 16px;
     }
+
+    &--error {
+      border-top: 2px solid $danger-color;
+      border-right: 2px solid $danger-color;
+      border-bottom: 2px solid $danger-color;
+      border-left: none;
+
+      &-left{
+        border-left: 2px solid $danger-color;
+      }
+    }
+
+    &--warning {
+      border-top: 2px solid $warning-color;
+      border-right: 2px solid $warning-color;
+      border-bottom: 2px solid $warning-color;
+      border-left: none;
+
+      &-left{
+        border-left: 2px solid $warning-color;
+      }
+    }
+
+    &--calendar {
+      border-radius: 0 4px 4px 0;
+      user-select: none;
+      cursor: pointer;
+    }
   }
 
   &__icon {
@@ -141,6 +214,12 @@ $transition: 100ms;
 
     &--active {
       fill: $primary-color;
+    }
+
+    &--error, &--warning {
+      position: absolute;
+      right: 16px;
+      top: 20px;
     }
   }
 
@@ -210,7 +289,7 @@ $transition: 100ms;
       &--disabled {
         pointer-events: none;
 
-        & > * {
+        &>* {
           pointer-events: none;
           border: solid $border-color;
           border-width: 0 3px 3px 0;
