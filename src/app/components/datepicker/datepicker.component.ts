@@ -9,6 +9,13 @@ interface ValidationI {
   type: ValidationTypeT
   name: ValidationNameT
   value?: number
+  message?: string
+}
+
+interface CurrentDateI {
+  month: number
+  replaceMonth?: boolean
+  year?: number
 }
 
 @Component({
@@ -21,24 +28,24 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   @Input() control: FormControl = new FormControl("");
   @Input() startAt: number = 0;
   @Input() endAt: number = 0;
-
-  validations: ValidationI[] = []
   @Input() holidays: string[] = [];
   @Input() isDisableWeekends: string | null = null;
-  @Input() isCheckingWorkdays: string | null = null;
+  validations: ValidationI[] = []
 
 
-  get disableWeekends(){
+  get disableWeekends() {
     return typeof this.isDisableWeekends === "string"
   }
-  get errorWorkday(){
-    return typeof this.isCheckingWorkdays === "string"
-  }
-  get minDate(){
+  get minDate() {
     return this.addDays(this.today, this.startAt)
   }
-  get maxDate(){
+  get maxDate() {
     return this.addDays(this.today, this.endAt || 730)
+  }
+  get validationType() {
+    console.log(this.validation)
+    if (this.validation) return this.validation.type
+    return null
   }
 
   @HostListener('document:click', ['$event'])
@@ -57,7 +64,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   weekdays = weekdays;
 
   /* Calendar controls */
-  validation:ValidationI | undefined = undefined;
+  validation: ValidationI | null = null;
   isFitting = false
   isDisableBack = false
   isDisableFront = false
@@ -66,11 +73,6 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   currentYear = this.today.getFullYear();
   selectedMonth = months[this.currentMonth];
   selectedYear = this.currentYear;
-
-  get maxDiffDays() {
-    if (this.maxDate) return this.diffDays(this.maxDate, this.today)
-    return 3650
-  }
 
   justNumber(valor: string) {
     const justNumbers = Number(valor.replace(/\D/g, ''));
@@ -105,7 +107,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     }
   }
 
-  getNextWorkDay(current: Date | string): any {
+  getNextWorkDay(current: Date | string): Date {
     const { isWeekend, isHoliday, tomorror } = this.checkHolidayOrWeekend(current)
     return (isWeekend || isHoliday) ? this.getNextWorkDay(tomorror) : new Date(current)
   }
@@ -127,52 +129,27 @@ export class DatepickerComponent implements OnInit, OnDestroy {
   }
 
   setMonth(event: Event) {
-    const { value } = event.target as HTMLInputElement;
-    const monthIndex = months.findIndex(
-      (month: string) => month === value
-    );
-    this.currentMonth = monthIndex;
+    const { value } = event.target as HTMLInputElement
+    const monthIndex = months.findIndex((month: string) => month === value)
+    this.currentMonth = monthIndex
   }
 
-  setDate(value: any) {
-    this.dateControl.setValue(value)
-    this.displayCalendar();
-  }
-
-  setDay(value: any) {
+  setDate(value: Date) {
     this.dateControl.setValue(value)
     this.displayCalendar();
   }
 
   setDisableArrows() {
-    if (this.minDate) {
-      if (
-        this.currentMonth - 1 < (this.minDate || this.today).getMonth() &&
-        this.currentYear <= (this.minDate || this.today).getFullYear()
-      ) {
-        this.isDisableBack = true
-      } else {
-        this.isDisableBack = false
-      }
-    } else {
-      this.isDisableBack = false
-    }
+    const minCondition = this.minDate && (this.currentMonth - 1 < (this.minDate || this.today).getMonth() &&
+      this.currentYear <= (this.minDate || this.today).getFullYear())
+    this.isDisableBack = minCondition
 
-    if (this.maxDate) {
-      if (
-        this.currentMonth + 1 > (this.maxDate || this.today).getMonth() &&
-        this.currentYear > (this.minDate || this.today).getFullYear()
-      ) {
-        this.isDisableFront = true
-      } else {
-        this.isDisableFront = false
-      }
-    } else {
-      this.isDisableFront = false
-    }
+    const maxCondition = this.maxDate && (this.currentMonth + 1 > (this.maxDate || this.today).getMonth() &&
+      this.currentYear > (this.minDate || this.today).getFullYear())
+    this.isDisableFront = maxCondition
   }
 
-  handleCurrentDate({ month, replaceMonth = false, year }: { month: number, replaceMonth?: boolean, year?: number }) {
+  handleCurrentDate({ month, replaceMonth = false, year }: CurrentDateI) {
     const newMonth = replaceMonth ? month : this.calendarToday.getMonth() + month
     this.calendarToday.setMonth(newMonth);
     if (year) this.calendarToday.setFullYear(year)
@@ -206,7 +183,7 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     return `${day} ${month} ${year}`
   }
 
-  handleDay(day: { number: number, weekday: number, date: Date }) {
+  handleDayState(day: { number: number, weekday: number, date: Date }) {
     const current = day.date
     const weekday = day.weekday
     const currentF = this.formatDate(current)
@@ -222,22 +199,13 @@ export class DatepickerComponent implements OnInit, OnDestroy {
     return ''
   }
 
-  /* handleValidations(){
-    if(this.validations.length > 0) {
-      this.validation = this.validations.find((validation) => validation)
+  handleValidations(isWarning: boolean = false, isError: boolean = false) {
+    const validationValue: ValidationI = {
+      type: isWarning ? "warning" : "error",
+      name: "workday",
     }
-  } */
-
-  error = false
-  warning = false
-
-  /* handleError(name: ValidationNameT, value: number, current: number) {
-    return {
-      "startAt": current > value,
-      "endAt": current < value,
-      "workday": "",
-    }[name]
-  } */
+    this.validation = isError || isWarning ? validationValue : null
+  }
 
   ngOnInit() {
     /* When calendar selection change */
@@ -247,34 +215,28 @@ export class DatepickerComponent implements OnInit, OnDestroy {
       const daysNumber = this.justNumber(diffDays)
       this.daysControl.setValue(daysNumber, { emitEvent: false });
       this.control.setValue(value)
-      this.error = false
-      this.warning = false
+      this.handleValidations()
     }))
     /* When day input change */
     this.subscription.add(this.daysControl.valueChanges.subscribe(value => {
       const daysNumber = this.justNumber(value)
       const formattedDate = this.addDays(this.today, Number(daysNumber))
 
-      if (this.error) {
-        this.warning = false
+      const isWarning = this.diffDays(formattedDate, this.today) <= this.startAt + 1
+      const isError = this.formatDate(this.getNextWorkDay(formattedDate)) !== this.formatDate(formattedDate)
+
+      if (isError || isWarning) {
+        this.handleValidations(isWarning, isError)
+        this.dateControl.setValue(null, { emitEvent: false });
+        this.control.setValue(null)
       } else {
-        this.warning = this.diffDays(formattedDate, this.today) <= this.startAt + 1
+        this.handleValidations()
+        this.dateControl.setValue(formattedDate, { emitEvent: false });
+        this.control.setValue(formattedDate)
       }
-
-      if (this.warning) {
-        this.error = false
-      } else {
-        this.error = this.formatDate(this.getNextWorkDay(formattedDate)) !== this.formatDate(formattedDate)
-      }
-
-
-
-
       this.daysControl.setValue(daysNumber, { emitEvent: false });
-      this.dateControl.setValue(formattedDate, { emitEvent: false });
-      this.control.setValue(formattedDate)
+
     }))
-    /* this.handleValidations() */
   }
 
   ngOnDestroy() {

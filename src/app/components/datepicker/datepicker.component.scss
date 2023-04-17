@@ -47,7 +47,7 @@ $transition: 100ms;
     line-height: 24px;
     transition: $transition;
 
-    &--active {
+    &--active:not(.datepicker__label--warning):not(.datepicker__label--error) {
       color: $primary-color;
     }
 
@@ -58,53 +58,6 @@ $transition: 100ms;
       line-height: 16px;
     }
   }
-
-  /* &__validation {
-    box-sizing: border-box;
-    position: absolute;
-    background-color: transparent;
-    pointer-events: none;
-    height: 56px;
-    width: 100%;
-    max-width: 400px;
-    z-index: 1;
-    border-radius: 4px;
-    display: flex;
-
-    &__days {
-      flex: 3;
-    }
-
-    &__calendar {
-      flex: 5;
-      position: relative;
-    }
-
-    &__divider {
-      position: absolute;
-      left: -3px;
-      top: 0;
-      height: 54px;
-      width: 3px;
-      z-index: 2;
-
-      &--error {
-        background-color: $danger-color;
-      }
-
-      &--warning {
-        background-color: $warning-color;
-      }
-    }
-
-    &--error {
-      border: 2px solid $danger-color;
-    }
-
-    &--warning {
-      border: 2px solid $warning-color;
-    }
-  } */
 
   &__mask {
     position: absolute;
@@ -179,7 +132,7 @@ $transition: 100ms;
       border-bottom: 2px solid $danger-color;
       border-left: none;
 
-      &-left{
+      &-left {
         border-left: 2px solid $danger-color;
       }
     }
@@ -190,7 +143,7 @@ $transition: 100ms;
       border-bottom: 2px solid $warning-color;
       border-left: none;
 
-      &-left{
+      &-left {
         border-left: 2px solid $warning-color;
       }
     }
@@ -212,11 +165,12 @@ $transition: 100ms;
     height: 20px;
     transition: $transition;
 
-    &--active {
+    &--active:not(.datepicker__icon--warning):not(.datepicker__icon--error) {
       fill: $primary-color;
     }
 
-    &--error, &--warning {
+    &--error,
+    &--warning {
       position: absolute;
       right: 16px;
       top: 20px;
