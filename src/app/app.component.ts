@@ -3,8 +3,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 
 interface Validation {
   type: "error" | "warning"
-  name?: "startAt" | "endAt" | "workday"
-  value?: number
+  name: "startAt" | "endAt" | "workday"
+  message?: string
 }
 
 @Component({
@@ -21,9 +21,8 @@ export class AppComponent {
   });
 
   validations: Validation[] = [
-    { type: "warning", name: 'startAt', value: 0},
-    { type: "warning", name: 'endAt', value: 365},
-    { type: "error", name: 'workday'},
+    { type: "warning", name: 'startAt', message: "Plazo mínimo de 7 días."},
+    { type: "warning", name: 'endAt', message: "Plazo máximo de 360 días."},
+    { type: "error", name: 'workday', message: "El vencimiento debe ser en un día hábil."},
   ]
-
 }

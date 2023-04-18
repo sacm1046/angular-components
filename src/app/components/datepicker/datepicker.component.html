@@ -2,7 +2,7 @@
   <div [ngClass]="[
       showCalendar ? 'datepicker__input-group--active' : '',
       'datepicker__input-group',
-      validationType ? 'datepicker__input-group--{{validationType}}': '',
+      validation ? 'datepicker__input-group--{{validation.type}}': '',
     ]">
 
     <!-- Days range section -->
@@ -11,7 +11,7 @@
           'datepicker__input',
           daysControl.value ? 'datepicker__input--with-data' : '',
           'datepicker__input--days',
-          validationType ? 'datepicker__input--' + validationType + ' datepicker__input--' + validationType + '-left' : '',
+          validation ? 'datepicker__input--' + validation.type + ' datepicker__input--' + validation.type + '-left' : '',
           ]" [formControl]="daysControl" [maxlength]="3" [readonly]="false">
       <label for="datepicker__input__days" [ngClass]="[
           'datepicker__label',
@@ -25,14 +25,14 @@
         <span class="datepicker__mask__character">días</span>
       </div>
 
-      <svg *ngIf="validationType === 'warning'" class="datepicker__icon--{{validationType}}" width="23" height="19"
-        viewBox="0 0 23 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg *ngIf="validation && validation.type === 'warning'" class="datepicker__icon--{{validation.type}}" width="23"
+        height="19" viewBox="0 0 23 19" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd" clip-rule="evenodd"
           d="M22.5 19L11.5 0L0.5 19H22.5ZM10.5 16V14H12.5V16H10.5ZM10.5 12H12.5V8H10.5V12Z" fill="#EE9800" />
       </svg>
 
-      <svg *ngIf="validationType === 'error'" class="datepicker__icon--{{validationType}}" width="21" height="20"
-        viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg *ngIf="validation && validation.type === 'error'" class="datepicker__icon--{{validation.type}}" width="21"
+        height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd" clip-rule="evenodd"
           d="M10.5 0C4.98 0 0.5 4.48 0.5 10C0.5 15.52 4.98 20 10.5 20C16.02 20 20.5 15.52 20.5 10C20.5 4.48 16.02 0 10.5 0ZM9.5 15V13H11.5V15H9.5ZM9.5 5V11H11.5V5H9.5Z"
           fill="#D9534F" />
@@ -46,22 +46,25 @@
           'datepicker__label',
           showCalendar ? 'datepicker__label--active' : '',
           dateControl.value || showCalendar ? 'datepicker__label--with-data' : '',
-          validationType ? 'datepicker__label--' + validationType : '',
+          validation ? 'datepicker__label--' + validation.type : '',
         ]">Vencimiento</label>
       <input type="text" id="datepicker__input__calendar" [ngClass]="[
           'datepicker__input',
           showCalendar ? 'datepicker__input--active' : '',
           dateControl.value ? 'datepicker__input--with-data' : '',
           'datepicker__input--calendar',
-          validationType ? 'datepicker__input--' + validationType : '',
-        ]" [value]="formatDate(this.dateControl.value)" (click)="displayCalendar()" readonly>
+          validation ? 'datepicker__input--' + validation.type : '',
+        ]" [value]="calendarValue" (click)="displayCalendar()" readonly>
+
+
       <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" [ngClass]="[
-      showCalendar ? 'datepicker__icon--active' : '',
-      'datepicker__icon',
-      validationType ? 'datepicker__icon--' + validationType : '',
-    ]" fill="#AFBACC" (click)="displayCalendar()">
+        showCalendar ? 'datepicker__icon--active' : '',
+        'datepicker__icon',
+        validation ? 'datepicker__icon--' + validation.type : '',
+      ]" (click)="displayCalendar()">
         <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M19.22 4H18.22V2H16.22V4H8.21997V2H6.21997V4H5.21997C4.10997 4 3.22997 4.9 3.22997 6L3.21997 20C3.21997 21.1 4.10997 22 5.21997 22H19.22C20.32 22 21.22 21.1 21.22 20V6C21.22 4.9 20.32 4 19.22 4ZM7.21997 11V13H9.21997V11H7.21997ZM13.22 11H11.22V13H13.22V11ZM17.22 11V13H15.22V11H17.22ZM5.21997 20H19.22V9H5.21997V20Z" />
+          d="M19.5 3H20.5C21.6 3 22.5 3.9 22.5 5V21C22.5 22.1 21.6 23 20.5 23H4.5C3.4 23 2.5 22.1 2.5 21V5C2.5 3.9 3.4 3 4.5 3H5.5V1H7.5V3H17.5V1H19.5V3ZM4.5 21H20.5V8H4.5V21Z"
+          fill="#7F90AF" />
       </svg>
 
       <div [ngClass]="[
@@ -127,5 +130,11 @@
 
     </div>
 
+  </div>
+  <div *ngIf="validation" [ngClass]="[
+  'datepicker__validation',
+  'datepicker__validation--' + validation.type
+  ]">
+    {{validation.message}}
   </div>
 </div>

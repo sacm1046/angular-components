@@ -344,4 +344,19 @@ $transition: 100ms;
     padding: 24px;
     user-select: none;
   }
+
+  &__validation {
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    margin: 8px 0 0 16px;
+
+    &--error {
+      color: $danger-color;
+    }
+
+    &--warning {
+      color: $warning-color;
+    }
+  }
 }

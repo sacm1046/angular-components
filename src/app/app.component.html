@@ -1,18 +1,13 @@
 <h1>Hola</h1>
 
-<!-- [minDate]="minDate"
-  [maxDate]="maxDate" -->
-
 <lib-datepicker
   [control]="profileForm.controls.today"
-
   [startAt]="7"
-  [endAt]="365"
+  [endAt]="360"
   isCheckingWorkdays
   isDisableWeekends
-
   [validations]="validations"
-  [holidays]="['2023/05/17']"
+  [holidays]="['2023/05/17', '2023/05/18']"
   >
   <div class="fake">Este es un footer de prueba</div>
 </lib-datepicker>
